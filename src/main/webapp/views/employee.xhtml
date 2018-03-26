@@ -1,0 +1,124 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head>
+    <title>Employee</title>
+    <script>
+        function rowEditStart() {
+            $('.ui-row-editor span.ui-icon-pencil').each(function () {
+                $(this).css('visibility', 'hidden');
+            });
+        }
+        function rowEditComplete() {
+            $('.ui-row-editor span.ui-icon-pencil').each(function () {
+                $(this).css('visibility', 'visible');
+            });
+        }
+    </script>
+</h:head>
+<h:body>
+
+    <h:form id="mainForm">
+        <p:messages id="msgs" closable="true"/>
+
+        <p:commandButton value="Add Employee" actionListener="#{employeeBean.addRecord()}" update="dt"
+                         style="margin: 5px 5px 5px 5px"
+                         oncomplete="jQuery('.ui-datatable-data tr').last().find('span.ui-icon-pencil').each(function(){jQuery(this).click()});"/>
+        <p:dataTable id="dt" styleClass="sClass ui-datatable-hor-scroll"
+                     value="#{employeeBean.employees}" var="emp"
+                     paginator="true" paginatorPosition="bottom"
+                     rows="20" rowsPerPageTemplate="10,15,20"
+                     editable="true" editingRow="#{employeeBean.editingMode}">
+
+            <p:ajax event="rowEdit" listener="#{employeeBean.edit}" update=":mainForm:msgs :mainForm:dt"
+                    oncomplete="rowEditComplete()"/>
+            <p:ajax event="rowEditInit" listener="#{employeeBean.onRowEditInit(emp)}" onstart="rowEditStart()"/>
+            <p:ajax event="rowEditCancel" listener="#{employeeBean.onRowEditCancel(emp)}" oncomplete="rowEditComplete()"
+                    update="dt"/>
+
+            <f:facet name="header">
+                <h:outputText value="Employees"/>
+            </f:facet>
+
+            <p:column headerText="Emp. Name">
+                <p:cellEditor>
+                    <f:facet name="output">
+                        <p:outputLabel value="#{emp.ename}"/>
+                    </f:facet>
+                    <f:facet name="input">
+                        <p:inputText value="#{emp.ename}" required="true" requiredMessage="Employee Name required"/>
+                    </f:facet>
+                </p:cellEditor>
+            </p:column>
+
+            <p:column headerText="Job">
+                <p:cellEditor>
+                    <f:facet name="output">
+                        <p:outputLabel value="#{emp.job}"/>
+                    </f:facet>
+                    <f:facet name="input">
+                        <p:inputText value="#{emp.job}"/>
+                    </f:facet>
+                </p:cellEditor>
+            </p:column>
+
+            <p:column headerText="Salary">
+                <p:cellEditor>
+                    <f:facet name="output">
+                        <p:outputLabel value="#{emp.sal}"/>
+                    </f:facet>
+                    <f:facet name="input">
+                        <p:inputText value="#{emp.sal}"/>
+                    </f:facet>
+                </p:cellEditor>
+            </p:column>
+
+            <p:column headerText="Manager">
+                <p:cellEditor>
+                    <f:facet name="output">
+                        <p:outputLabel value="#{emp.mgr}"/>
+                    </f:facet>
+                    <f:facet name="input">
+                        <p:inputText value="#{emp.mgr}"/>
+                    </f:facet>
+                </p:cellEditor>
+            </p:column>
+
+            <p:column headerText="Department">
+                <p:cellEditor>
+                    <f:facet name="output">
+                        <p:outputLabel value="#{emp.deptno.dname}"/>
+                    </f:facet>
+                    <f:facet name="input">
+                        <p:selectOneMenu effect="fade" style="width: 100%;" value="#{emp.deptno}"
+                                         converter="#{employeeBean.departmentConverter}">
+                            <f:selectItem itemLabel="Select Department" itemValue="#{null}"/>
+                            <f:selectItems value="#{employeeBean.departments}" var="dept" itemLabel="#{dept.dname}"
+                                           itemValue="#{dept}"/>
+                        </p:selectOneMenu>
+                    </f:facet>
+                </p:cellEditor>
+            </p:column>
+
+            <p:column headerText="Edit" style="text-align: center; width: 10%;">
+                <p:rowEditor/>
+            </p:column>
+
+            <p:column headerText="Delete" style="text-align: center; width: 10%;">
+                <p:commandLink
+                        onclick="if (!confirm('Are U Sure'))
+                                    return false"
+                        actionListener="#{employeeBean.delete(emp)}" update=":mainForm:msgs :mainForm:dt">
+                    <p:graphicImage url="../../resources/images/Delete-icon.png" alt="i"></p:graphicImage>
+                </p:commandLink>
+            </p:column>
+
+        </p:dataTable>
+    </h:form>
+
+</h:body>
+</html>
